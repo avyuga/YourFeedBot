@@ -4,15 +4,13 @@ import re
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.types import BotCommand
 
 from commands import basic, menu
 from utils import database
 from credentials import TOKEN
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 # Initialize bot and dispatcher
 bot = Bot(token=TOKEN)
@@ -20,25 +18,10 @@ bot = Bot(token=TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-
-class Form(StatesGroup):
-    WAIT_MESSAGE = State()
-    READY = State()
-
-
 user_id = ""
 
 basic.register_basic_commands(dp)
 menu.register_menu_commands(dp)
-
-async def parse_channels(message: types.Message, state: FSMContext):
-    channels = re.findall(r'@\w*\b', message.text)
-    print("Channels ", channels)
-    user_data = await state.get_data()
-    print("User_data: ", user_data)
-    await message.answer("First channel is: ", channels[0])
-    await state.reset_state(with_data=False)
-
 
 @dp.message_handler()
 async def echo(message: types.Message):
@@ -71,5 +54,5 @@ if __name__ == '__main__':
 
     executor.start_polling(dp, skip_updates=True)
 
-    database.close_connection(connection, cursor)
+    database.close_connection()
     exit(0)

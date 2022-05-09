@@ -6,9 +6,11 @@ from credentials import DBNAME, USER, PASSWORD, HOST
 
 logging.basicConfig(level=logging.INFO)
 
+global connection
+global cursor
+
 def initial_connect():
-    connection = None
-    cursor = None
+    global connection, cursor
     try:
         connection = psycopg2.connect(dbname=DBNAME, user=USER,
                                       password=PASSWORD, host=HOST)
@@ -20,7 +22,8 @@ def initial_connect():
         logging.error("Ошибка при инициализации PostgreSQL", error)
     return connection, cursor
 
-def find_user(connection, cursor, user_id):
+def find_user(user_id):
+    global connection, cursor
     # user_id = 'test'
     cursor.execute(f"SELECT * FROM channels WHERE username = '{user_id}'")
     results = cursor.fetchall()
@@ -30,10 +33,19 @@ def find_user(connection, cursor, user_id):
         for row in results:
             print(row)
     else:
-        cursor.execute(f"INSERT INTO channels VALUES('{user_id}', '{{blah}}')")
+        cursor.execute(f"INSERT INTO channels VALUES('{user_id}', '{{}}')")
         connection.commit()
 
-def close_connection(connection, cursor):
+def write_to_db(user_id, item):
+    global connection, cursor
+    # todo найти способ разом список заносить
+    query = """ UPDATE channels SET list = array_append(list, %s) 
+                WHERE username = '%s' """
+    cursor.execute(query, (item, user_id))
+    connection.commit()
+
+def close_connection():
+    global connection, cursor
     cursor.close()
     connection.close()
     logging.info("Соединение с PostgreSQL закрыто")
