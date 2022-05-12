@@ -1,15 +1,13 @@
 import logging
-import re
-
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.dispatcher import FSMContext
 
 from commands import basic, menu
 from utils import database
 from credentials import TOKEN
 
 # Configure logging
+# fixme починить логгирование
 logging.basicConfig(level=logging.DEBUG)
 
 # Initialize bot and dispatcher
