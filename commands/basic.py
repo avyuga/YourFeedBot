@@ -11,12 +11,15 @@ async def send_welcome(message: types.Message):
     await message.reply("Hi!\nI'm VuygaBot! \nHere is the keyboard:",
                         reply_markup=keyboard)
 
+
 async def send_help(message: types.Message):
     await message.reply("Hi!\nI'm VuygaBot! \nHere is the keyboard:",
                         reply_markup=keyboard)
 
+
 async def send_menu_from_command(message: types.Message):
     await message.answer("Here is the menu!", reply_markup=menu_keyboard)
+
 
 async def send_menu_from_button(callback: types.CallbackQuery):
     await callback.answer()

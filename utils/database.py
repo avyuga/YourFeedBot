@@ -23,6 +23,7 @@ def initial_connect():
     finally:
         return connection, cursor
 
+
 def find_user(user_id):
     global connection, cursor
     # user_id = 'test'
@@ -30,19 +31,33 @@ def find_user(user_id):
     results = cursor.fetchall()
     if len(results) != 0:
         logging.warning(f"Пользователь {user_id} уже есть в базе данных.")
-        # todo сделать кнопочку - взять этот список или начать заново
+        # todo сделать кнопку - взять этот список или начать заново
         for row in results:
             print(f"{row['username']}: {row['list']}")
     else:
         cursor.execute(f"INSERT INTO channels VALUES('{user_id}', '{{}}')")
 
 
+def get_user_ids():
+    global connection, cursor
+    query = """SELECT username FROM channels"""
+    cursor.execute(query)
+    result = cursor.fetchall()
+    return result[0]
+
+
 def get_channels_list(user_id):
     global connection, cursor
-    query = """ SELECT list FROM channels WHERE username = '%s' """
+    query = """SELECT list FROM channels WHERE username = '%s' """
     cursor.execute(query, [user_id])
     result = cursor.fetchall()
+    # todo check indexing
     return result[0][0]
+
+
+def get_last_message(user_id):
+    global connection, cursor
+    query = """SELECT list FROM channels WHERE username = '%s' """
 
 def write_to_db(user_id, item):
     global connection, cursor
