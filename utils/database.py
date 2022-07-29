@@ -23,6 +23,7 @@ def initial_connect():
     finally:
         return connection, cursor
 
+# {2022-05-20T18:11:48+00:00}
 
 def find_user(user_id):
     global connection, cursor
@@ -48,23 +49,39 @@ def get_user_ids():
 
 def get_channels_list(user_id):
     global connection, cursor
-    query = """SELECT list FROM channels WHERE username = '%s' """
-    cursor.execute(query, [user_id])
+    # query = """SELECT list FROM channels WHERE username = '%s' """
+    cursor.execute(f"SELECT list FROM channels WHERE username = '{user_id}'")
+    result = cursor.fetchall()
+    # todo check indexing
+    print(result[0][0])
+    return result[0][0]
+
+
+def get_last_message_dates(user_id):
+    global connection, cursor
+    # query = """SELECT dates FROM channels WHERE username = %s """
+    cursor.execute(f"SELECT dates FROM channels WHERE username = '{user_id}'")
     result = cursor.fetchall()
     # todo check indexing
     return result[0][0]
 
 
-def get_last_message(user_id):
-    global connection, cursor
-    query = """SELECT list FROM channels WHERE username = '%s' """
-
 def write_to_db(user_id, item):
     global connection, cursor
     # todo найти способ разом список заносить, при этом проверяя наличие
-    query = """ UPDATE channels SET list = array_append(list, %s) 
-                WHERE username = '%s' """
-    cursor.execute(query, (item, user_id))
+    # query = """ UPDATE channels SET list = array_append(list, %s)
+    #             WHERE username = '%s' """
+    cursor.execute(f" UPDATE channels SET list = array_append(list, {item}) "
+                   f"WHERE username = '{user_id}' ")
+
+
+def update_dates(user_id, new_dates):
+    global connection, cursor
+    # query = """ UPDATE channels SET dates = %s WHERE username = '%s' """
+    # cursor.execute(query, (new_dates, user_id))
+    # cursor.execute(f" UPDATE channels SET dates =  '{{ \"{new_dates[0]}\" }}'"
+    #                f" WHERE username = '{user_id}' ")
+    cursor.execute("UPDATE channels SET dates = %s WHERE username = %s", (new_dates, user_id))
 
 
 def close_connection():

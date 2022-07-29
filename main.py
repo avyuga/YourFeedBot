@@ -1,8 +1,9 @@
+import datetime
 import logging
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-from commands import basic, menu
+from commands import basic, menu, settings_mode
 from utils import database
 from credentials import TOKEN
 from updates.parser import check_updates
@@ -19,6 +20,8 @@ dp = Dispatcher(bot, storage=storage)
 
 basic.register_basic_commands(dp)
 menu.register_menu_commands(dp)
+settings_mode.register_settings_commands(dp)
+
 
 @dp.message_handler()
 async def echo(message: types.Message):
@@ -29,12 +32,19 @@ async def echo(message: types.Message):
 # todo Здесь прописать рассылку для каждого пользователя
 async def job(user_id):
     channels = database.get_channels_list(user_id)
-    for channel in channels:
-        last_message = None
-        check_updates(channel, last_message)
+    message_dates = database.get_last_message_dates(user_id)
+    new_dates = []
+    for i in range(len(channels)):
+        channel = channels[i]
+        last_message = message_dates[i]
+        last_message = datetime.datetime.strptime(last_message, f"%Y-%m-%dT%H:%M:%S+{last_message[-5:]}")
+        res, new_date = check_updates(channel, last_message)
+        new_dates += [new_date]
         # check_updates
-        print(channel)
-    await bot.send_message(int(user_id), "JOB DONE")
+        print(res)
+        if res != '':
+            await bot.send_message(int(user_id), res)
+    if len(channels) != 0: database.update_dates(user_id, new_dates)
 
 
 async def scheduler():
@@ -42,7 +52,7 @@ async def scheduler():
     # наладить время обновления, 5 секунд - слишком коротко
     users = database.get_user_ids()
     for user in users:
-        aioschedule.every(5).seconds.do(job, user_id=user)
+        aioschedule.every(10).seconds.do(job, user_id=user)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
