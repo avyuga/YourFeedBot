@@ -1,9 +1,12 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-button_start = InlineKeyboardButton("Add", callback_data='add_channel')
-button_settings = InlineKeyboardButton("Settings", callback_data='get_settings')
-menu_keyboard = InlineKeyboardMarkup().add(button_start, button_settings)
 
-button_menu = InlineKeyboardButton("Menu", callback_data='menu')
+# todo добавить плашку help
+button_menu = InlineKeyboardButton("Enter SETTINGS MODE", callback_data='settings')
 keyboard = InlineKeyboardMarkup(resize_keyboard=True)
 keyboard.add(button_menu)
+
+command_add = InlineKeyboardButton("Add channel", callback_data='add_channel')
+command_delete = InlineKeyboardButton("Delete channel", callback_data='delete_channel')
+command_quit_SM = InlineKeyboardButton("Quit SETTINGS MODE", callback_data='quit')
+command_keyboard = InlineKeyboardMarkup(resize_keyboard=True).add(command_add, command_delete, command_quit_SM)

@@ -8,6 +8,7 @@ from utils import database
 from credentials import TOKEN
 from updates.parser import check_updates
 import aioschedule, asyncio
+
 # Configure logging
 # fixme починить логгирование
 logging.basicConfig(level=logging.DEBUG)

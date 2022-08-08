@@ -2,10 +2,15 @@ import logging
 import re
 
 from aiogram import Dispatcher, types
-from aiogram.dispatcher import FSMContext
 
 from utils.states import Form
 from utils import database
+from commands.menu import quit_settings_mode
+
+
+async def add_channels_from_button(callback: types.CallbackQuery):
+    await callback.answer()
+    await add_channels(callback.message)
 
 
 async def add_channels(message: types.Message):
@@ -33,6 +38,25 @@ async def parse_and_add_channels(message: types.Message):
     await Form.SETTINGS_MODE.set()
 
 
+async def delete_channels(callback: types.CallbackQuery):
+    await callback.answer()
+    await callback.message.answer("To be done")
+
+
+async def parse_and_delete_channels(message: types.Message):
+    await message.answer("In process, go back to SETTINGS MODE")
+    await Form.SETTINGS_MODE.set()
+
+
 def register_settings_commands(dp: Dispatcher):
     dp.register_message_handler(add_channels, commands='add_channel', state=Form.SETTINGS_MODE)
+    dp.register_message_handler(delete_channels, commands='delete_channel', state=Form.SETTINGS_MODE)
+
     dp.register_message_handler(parse_and_add_channels, state=Form.WAIT_MESSAGE)
+    dp.register_message_handler(parse_and_delete_channels, state=Form.WAIT_MESSAGE)
+
+    dp.register_callback_query_handler(add_channels_from_button, text='add_channel', state=Form.SETTINGS_MODE)
+    dp.register_callback_query_handler(delete_channels, text='delete_channel', state=Form.SETTINGS_MODE)
+    dp.register_callback_query_handler(quit_settings_mode, text='quit', state=Form.SETTINGS_MODE)
+
+
