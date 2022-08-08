@@ -8,12 +8,12 @@ async def send_welcome(message: types.Message):
     user_id = message.from_user.id
     # todo: вынести подключение к БД
     database.find_user(user_id)
-    await message.reply("Hi!\nI'm VuygaBot! \nHere is the keyboard:",
+    await message.reply("Hi!\nI'm YourFeedBot! \nHere is the keyboard:",
                         reply_markup=keyboard)
 
 
 async def send_help(message: types.Message):
-    await message.reply("Hi!\nI'm VuygaBot! \nHere is the keyboard:",
+    await message.reply("Hi!\nI'm YourFeedBot! \nHere is the keyboard:",
                         reply_markup=keyboard)
 
 

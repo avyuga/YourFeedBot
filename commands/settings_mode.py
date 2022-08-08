@@ -14,7 +14,11 @@ async def add_channels(message: types.Message):
 
 
 async def parse_and_add_channels(message: types.Message):
-    channels = re.findall(r'https://t\.me/s/*', message.text)
+    channels = []
+    links = re.split(",", message.text)
+    for link in links:
+        items = re.split("/", link)
+        channels += [items[-1]]
     logging.info(f"Channels: {channels}")
     initial_list = database.get_channels_list(message.from_user.id)
     number = 0

@@ -1,3 +1,5 @@
+import datetime
+
 import psycopg2
 import logging
 from psycopg2 import Error
@@ -25,6 +27,7 @@ def initial_connect():
 
 # {2022-05-20T18:11:48+00:00}
 
+
 def find_user(user_id):
     global connection, cursor
     # user_id = 'test'
@@ -36,7 +39,7 @@ def find_user(user_id):
         for row in results:
             print(f"{row['username']}: {row['list']}")
     else:
-        cursor.execute(f"INSERT INTO channels VALUES('{user_id}', '{{}}')")
+        cursor.execute(f"INSERT INTO channels VALUES('{user_id}', '{{}}', '{{}}')")
 
 
 def get_user_ids():
@@ -44,6 +47,8 @@ def get_user_ids():
     query = """SELECT username FROM channels"""
     cursor.execute(query)
     result = cursor.fetchall()
+    if cursor.rowcount == 0:
+        return []
     return result[0]
 
 
@@ -71,8 +76,14 @@ def write_to_db(user_id, item):
     # todo найти способ разом список заносить, при этом проверяя наличие
     # query = """ UPDATE channels SET list = array_append(list, %s)
     #             WHERE username = '%s' """
-    cursor.execute(f" UPDATE channels SET list = array_append(list, {item}) "
-                   f"WHERE username = '{user_id}' ")
+    cursor.execute(f' UPDATE channels SET list = array_append(list, \'{item}\') '
+                   f'WHERE username = \'{user_id}\' ')
+    # TODO заносить текущую дату при добавлении нового канала
+    timing = datetime.datetime.now()
+    timing_str = datetime.datetime.strftime(timing, f"%Y-%m-%dT%H:%M:%S+00:00")
+    # 2022 - 05 - 20T18: 11:48 + 00: 00
+    cursor.execute(f' UPDATE channels SET dates = array_append(dates, \'{timing_str}\') '
+                   f'WHERE username = \'{user_id}\' ')
 
 
 def update_dates(user_id, new_dates):

@@ -62,6 +62,7 @@ async def settings_mode():
 #     await message.answer("This section is not ready yet. \nPlease wait!")
 # dp.register_message_handler(command_send_forward, commands='forward', state='*')
 
+
 def register_menu_commands(dp: Dispatcher):
     # dp.register_callback_query_handler(add_channel_from_button,
     #                                    text='add_channel', state='*')
