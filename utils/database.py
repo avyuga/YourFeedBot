@@ -12,6 +12,8 @@ logging.basicConfig(level=logging.INFO)
 global connection
 global cursor
 
+# todo починить cursor.execute(... %s) - сделать везде однообразно
+
 
 def initial_connect():
     global connection, cursor
@@ -24,8 +26,6 @@ def initial_connect():
         logging.error("Ошибка при инициализации PostgreSQL", error)
     finally:
         return connection, cursor
-
-# {2022-05-20T18:11:48+00:00}
 
 
 def find_user(user_id):
@@ -58,7 +58,8 @@ def get_channels_list(user_id):
     cursor.execute(f"SELECT list FROM channels WHERE username = '{user_id}'")
     result = cursor.fetchall()
     # todo check indexing
-    print(result[0][0])
+    if cursor.rowcount == 0:
+        return []
     return result[0][0]
 
 
@@ -68,6 +69,8 @@ def get_last_message_dates(user_id):
     cursor.execute(f"SELECT dates FROM channels WHERE username = '{user_id}'")
     result = cursor.fetchall()
     # todo check indexing
+    if cursor.rowcount == 0:
+        return []
     return result[0][0]
 
 

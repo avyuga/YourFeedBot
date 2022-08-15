@@ -3,8 +3,10 @@ import logging
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-from commands import basic, menu, settings_mode
+from commands import menu, settings_mode
 from utils import database
+from utils.states import Form
+
 from credentials import TOKEN
 from updates.parser import check_updates
 import aioschedule, asyncio
@@ -19,7 +21,6 @@ bot = Bot(token=TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-basic.register_basic_commands(dp)
 menu.register_menu_commands(dp)
 settings_mode.register_settings_commands(dp)
 

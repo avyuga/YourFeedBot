@@ -5,8 +5,9 @@ from aiogram import Dispatcher, types
 
 from utils.states import Form
 from utils import database
-from commands.menu import quit_settings_mode
 
+
+# -------- ADD CHANNELS -------- #
 
 async def add_channels_from_button(callback: types.CallbackQuery):
     await callback.answer()
@@ -35,12 +36,19 @@ async def parse_and_add_channels(message: types.Message):
             logging.info(f"Channel {channel} is already in the list")
     message_str = f"You have written {number} channels, others were already in!"
     await message.answer(message_str)
-    await Form.SETTINGS_MODE.set()
+    await Form.READY.set()
 
 
-async def delete_channels(callback: types.CallbackQuery):
-    await callback.message.answer("Please write links to channels you want to delete. "
-                                  "\nNOTE: channels you write should be in the list!")
+# -------- DELETE CHANNELS -------- #
+
+async def delete_channels_from_button(callback: types.CallbackQuery):
+    await callback.answer()
+    await delete_channels(callback.message)
+
+
+async def delete_channels(message: types.Message):
+    await message.answer("Please write links to channels you want to delete. "
+                         "\nNOTE: channels you write should be in the list!")
     await Form.WAIT_MESSAGE_DELETE.set()
 
 
@@ -57,16 +65,44 @@ async def parse_and_delete_channels(message: types.Message):
     message_str = f"You have deleted {len(channels)} channels, others are still in!"
     database.update_dates(message.from_user.id, length=len(channels))
     await message.answer(message_str)
-    await Form.SETTINGS_MODE.set()
+    await Form.READY.set()
 
+
+# --------- SHOW --------- #
+
+async def show_list_from_button(callback: types.CallbackQuery):
+    await callback.answer()
+    await show_list(callback.message, callback.from_user.id)
+
+
+async def show_list(message: types.Message, user_id=0):
+    if user_id == 0: user_id = message.from_user.id
+    channels = database.get_channels_list(user_id)
+    logging.info(channels)
+    if len(channels) != 0:
+        dates = database.get_last_message_dates(user_id)
+        string = ''
+        for (channel, date) in zip(channels, dates):
+            string += f"\u2022 https://t.me/{channel} : {date}\n"
+        await message.answer("Here are your channels and last messages received:\n" + string)
+    else:
+        await message.answer("No channels are written now.")
+
+
+# --------- REGISTER --------- #
 
 def register_settings_commands(dp: Dispatcher):
-    dp.register_message_handler(add_channels, commands='add_channel', state=Form.SETTINGS_MODE)
-    dp.register_message_handler(delete_channels, commands='delete_channel', state=Form.SETTINGS_MODE)
+    # commands
+    dp.register_message_handler(show_list, commands='show_channels', state=Form.READY)
+    dp.register_message_handler(add_channels, commands='add_channel', state=Form.READY)
+    dp.register_message_handler(delete_channels, commands='delete_channel', state=Form.READY)
 
+    # parsers
     dp.register_message_handler(parse_and_add_channels, state=Form.WAIT_MESSAGE_ADD)
     dp.register_message_handler(parse_and_delete_channels, state=Form.WAIT_MESSAGE_DELETE)
 
-    dp.register_callback_query_handler(add_channels_from_button, text='add_channel', state=Form.SETTINGS_MODE)
-    dp.register_callback_query_handler(delete_channels, text='delete_channel', state=Form.SETTINGS_MODE)
-    dp.register_callback_query_handler(quit_settings_mode, text='quit', state=Form.SETTINGS_MODE)
+    # buttons
+    dp.register_callback_query_handler(show_list_from_button, text='show_channels', state=Form.READY)
+    dp.register_callback_query_handler(add_channels_from_button, text='add_channel', state=Form.READY)
+    dp.register_callback_query_handler(delete_channels_from_button, text='delete_channel', state=Form.READY)
+
