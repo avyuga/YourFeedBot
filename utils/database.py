@@ -86,13 +86,36 @@ def write_to_db(user_id, item):
                    f'WHERE username = \'{user_id}\' ')
 
 
-def update_dates(user_id, new_dates):
+def delete_from_db(user_id, item):
+    global connection, cursor
+    cursor.execute(f' UPDATE channels SET list = array_remove(list, \'{item}\') '
+                   f'WHERE username = \'{user_id}\' ')
+
+    # initial_list = get_channels_list(user_id)
+    # new_list = [item for item in initial_list if item not in items]
+    #
+    # timing = datetime.datetime.now()
+    # timing_str = datetime.datetime.strftime(timing, f"%Y-%m-%dT%H:%M:%S+00:00")
+    # new_dates = [timing_str for _ in range(len(new_list))]
+    #
+    # cursor.execute(f'UPDATE channels SET list = \'{new_list}\' WHERE username = \'{user_id}\' ')
+    # cursor.execute(f'UPDATE channels SET dates = \'{new_dates}\' WHERE username = \'{user_id}\' ')
+
+
+def update_dates(user_id, new_dates=None, length=0):
     global connection, cursor
     # query = """ UPDATE channels SET dates = %s WHERE username = '%s' """
-    # cursor.execute(query, (new_dates, user_id))
+    # cursor.execute(query, (new_dates, user_id)
     # cursor.execute(f" UPDATE channels SET dates =  '{{ \"{new_dates[0]}\" }}'"
     #                f" WHERE username = '{user_id}' ")
-    cursor.execute("UPDATE channels SET dates = %s WHERE username = %s", (new_dates, user_id))
+    if new_dates is not None:
+        cursor.execute("UPDATE channels SET dates = %s WHERE username = %s", (new_dates, user_id))
+    else:
+        init_dates = get_last_message_dates(user_id)
+        timing = datetime.datetime.now()
+        timing_str = datetime.datetime.strftime(timing, f"%Y-%m-%dT%H:%M:%S+00:00")
+        new_dates = [timing_str for _ in range(len(init_dates) - length)]
+        cursor.execute("UPDATE channels SET dates = %s WHERE username = %s", (new_dates, str(user_id)))
 
 
 def close_connection():

@@ -15,7 +15,7 @@ async def add_channels_from_button(callback: types.CallbackQuery):
 
 async def add_channels(message: types.Message):
     await message.answer("Please write links of the channels you want to add")
-    await Form.WAIT_MESSAGE.set()
+    await Form.WAIT_MESSAGE_ADD.set()
 
 
 async def parse_and_add_channels(message: types.Message):
@@ -39,12 +39,24 @@ async def parse_and_add_channels(message: types.Message):
 
 
 async def delete_channels(callback: types.CallbackQuery):
-    await callback.answer()
-    await callback.message.answer("To be done")
+    await callback.message.answer("Please write links to channels you want to delete. "
+                                  "\nNOTE: channels you write should be in the list!")
+    await Form.WAIT_MESSAGE_DELETE.set()
 
 
 async def parse_and_delete_channels(message: types.Message):
-    await message.answer("In process, go back to SETTINGS MODE")
+    channels = []
+    links = re.split(",", message.text)
+    for link in links:
+        items = re.split("/", link)
+        channels += [items[-1]]
+    logging.info(f"Channels: {channels}")
+    # assume that channels to delete are in the list
+    for channel in channels:
+        database.delete_from_db(message.from_user.id, channel)
+    message_str = f"You have deleted {len(channels)} channels, others are still in!"
+    database.update_dates(message.from_user.id, length=len(channels))
+    await message.answer(message_str)
     await Form.SETTINGS_MODE.set()
 
 
@@ -52,11 +64,9 @@ def register_settings_commands(dp: Dispatcher):
     dp.register_message_handler(add_channels, commands='add_channel', state=Form.SETTINGS_MODE)
     dp.register_message_handler(delete_channels, commands='delete_channel', state=Form.SETTINGS_MODE)
 
-    dp.register_message_handler(parse_and_add_channels, state=Form.WAIT_MESSAGE)
-    dp.register_message_handler(parse_and_delete_channels, state=Form.WAIT_MESSAGE)
+    dp.register_message_handler(parse_and_add_channels, state=Form.WAIT_MESSAGE_ADD)
+    dp.register_message_handler(parse_and_delete_channels, state=Form.WAIT_MESSAGE_DELETE)
 
     dp.register_callback_query_handler(add_channels_from_button, text='add_channel', state=Form.SETTINGS_MODE)
     dp.register_callback_query_handler(delete_channels, text='delete_channel', state=Form.SETTINGS_MODE)
     dp.register_callback_query_handler(quit_settings_mode, text='quit', state=Form.SETTINGS_MODE)
-
-
