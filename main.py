@@ -5,7 +5,6 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 from commands import menu, settings_mode
 from utils import database
-from utils.states import Form
 
 from credentials import TOKEN
 from updates.parser import check_updates
@@ -49,7 +48,7 @@ async def job():
             # check_updates
             print(res)
             if res != '':
-                await bot.send_message(int(user_id), res)
+                await bot.send_message(int(user_id), res, parse_mode='markdown')
         if len(channels) != 0: database.update_dates(user_id, new_dates)
 
 

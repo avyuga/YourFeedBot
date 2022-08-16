@@ -27,8 +27,10 @@ def check_updates(channel_link, last_message_time: datetime.datetime):
         if new_date is None: new_date = time_string
         timing = datetime.datetime.strptime(time_string, f"%Y-%m-%dT%H:%M:%S+{time_string[-5:]}")
         if timing <= last_message_time: break
-        print(f"Message: {tag_text.get_text()}, Time: {timing}")
-        str_time = datetime.datetime.strftime(timing, "At %d.%m.%Y, %H:%M, sent:")
-        result += f"{str_time} {tag_text.get_text()}\n"
+        print(f"Channel: {URL}, Message: {tag_text.get_text()}, Time: {timing}")
+        str_time = datetime.datetime.strftime(timing, "%d.%m.%Y, %H:%M:%S")
+        result += f"*\u2022At {str_time}:* \n{tag_text.get_text()}\n"
+    if result != '':
+        result = f"*Channel {URL} has sent:*\n" + result
     return result, new_date
 
