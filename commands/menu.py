@@ -2,34 +2,20 @@ from aiogram import Dispatcher, types
 
 from utils import database
 from utils.states import Form
-
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
-
-# --------- KEYBOARD --------- #
-# todo добавить плашку help
-
-command_show = InlineKeyboardButton("Show channels", callback_data='show_channels')
-command_add = InlineKeyboardButton("Add channel", callback_data='add_channel')
-command_delete = InlineKeyboardButton("Delete channel", callback_data='delete_channel')
-command_keyboard = InlineKeyboardMarkup(resize_keyboard=True, row_width=1)\
-    .add(command_show, command_add, command_delete)
-
-button = InlineKeyboardMarkup(resize_keyboard=True).add(InlineKeyboardButton(
-    "List of commands", callback_data='get_commands'))
+from utils.keyboards import command_keyboard, get_commands_button
 
 
 # ---------- START & HELP ---------- #
-
 async def send_welcome(message: types.Message):
     user_id = message.from_user.id
     # todo: вынести подключение к БД
     database.find_user(user_id)
-    await message.reply("Hi! I'm YourFeedBot!")
+    await message.reply("Hi! I'm YourFeedBot!\n"
+                        "To get list of commands, type /get_commands or press the button\u2193", reply_markup=get_commands_button)
 
 
 async def send_help(message: types.Message):
-    await message.reply("To get list of commands, type /get_commands or press the button\u2193", reply_markup=button)
+    await message.reply("To get list of commands, type /get_commands or press the button\u2193", reply_markup=get_commands_button)
 
 
 # ---------- COMMANDS UTILS --------- #
