@@ -39,17 +39,18 @@ async def job():
         channels = database.get_channels_list(user_id)
         message_dates = database.get_last_message_dates(user_id)
         new_dates = []
-        for i in range(len(channels)):
-            channel = channels[i]
-            last_message = message_dates[i]
-            last_message = datetime.datetime.strptime(last_message, f"%Y-%m-%dT%H:%M:%S+{last_message[-5:]}")
-            res, new_date = check_updates(channel, last_message)
-            new_dates += [new_date]
-            # check_updates
-            print(res)
-            if res != '':
-                await bot.send_message(int(user_id), res, parse_mode='markdown')
-        if len(channels) != 0: database.update_dates(user_id, new_dates)
+        if len(channels) != 0:
+            for i in range(len(channels)):
+                channel = channels[i]
+                last_message = message_dates[i]
+                last_message = datetime.datetime.strptime(last_message, f"%Y-%m-%dT%H:%M:%S+{last_message[-5:]}")
+                res, new_date = check_updates(channel, last_message)
+                new_dates += [new_date]
+                # check_updates
+                print(res)
+                if res != '':
+                    await bot.send_message(int(user_id), res, parse_mode='markdown')
+            database.update_dates(user_id, new_dates)
 
 
 # todo записать цикл в job, там же организовать получение нового списка
